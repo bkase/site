@@ -1,0 +1,117 @@
+@mixin animation($animate...) {
+    $max: length($animate);
+    $animations: '';
+
+    @for $i from 1 through $max {
+        $animations: #{$animations + nth($animate, $i)};
+
+        @if $i < $max {
+            $animations: #{$animations + ", "};
+        }
+    }
+    -webkit-animation: $animations;
+    -moz-animation:    $animations;
+    -o-animation:      $animations;
+    animation:         $animations;
+}
+
+@mixin ease($curve) {
+  -webkit-animation-timing-function: $curve;
+  -moz-animation-timing-function: $curve;
+  animation-timing-function: $curve;
+}
+
+@mixin keyframes($animationName) {
+    @-webkit-keyframes #{$animationName} {
+        @content;
+    }
+    @-moz-keyframes #{$animationName} {
+        @content;
+    }
+    @-o-keyframes #{$animationName} {
+        @content;
+    }
+    @keyframes #{$animationName} {
+        @content;
+    }
+}
+
+$termWidth: 80;
+$speeds: 3;
+ 
+$base03:    #002b36;
+$base02:    #073642;
+$base01:    #586e75;
+$base00:    #657b83;
+$base0:     #839496;
+$base1:     #93a1a1;
+$base2:     #eee8d5;
+$base3:     #fdf6e3;
+$yellow:    #b58900;
+$orange:    #cb4b16;
+$red:       #dc322f;
+$magenta:   #d33682;
+$violet:    #6c71c4;
+$blue:      #268bd2;
+$cyan:      #2aa198;
+$green:     #859900;
+  
+$bg: $base2;
+$fg: $base00;
+
+* {
+  font-family:DejaVu Sans Mono,Consolas,Monaco,Lucida Console,Liberation Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+}
+
+.terminal {
+  color: $fg;
+}
+
+@include keyframes(blink) {
+  0%   { color: $fg; }
+  10%  { color: $bg; }
+  50%  { color: $fg; }
+  60%  { color: $bg; }
+}
+
+.wiper {
+  position: absolute;
+  right: 0;
+  width: 100%;
+  background: $bg;
+  box-sizing: border-box;
+}
+
+.cursor {
+  @include animation('blink 1.1s infinite');
+}
+
+.childWidth {
+  position: relative;
+  display: table;
+}
+
+html {
+  background-color: $bg;
+}
+
+@include keyframes(type) {
+  from { width: 100% }
+  to { width: 0% }
+}
+
+.ghost-type-done {
+  display: none;
+}
+
+@for $speed from 1 through $speeds {
+  @for $i from 1 through $termWidth {
+    .ghost-type-#{$speed}-#{$i} {
+      width: 0%;
+
+      $time: ((0.05 * $i) / $speed);
+      @include animation('type #{$time}s steps(#{$i}, end)');
+    }
+  }
+}
+

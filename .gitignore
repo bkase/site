@@ -1,0 +1,4 @@
+# gitignore for site
+
+css/
+node_modules/
