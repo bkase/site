@@ -1,52 +1,70 @@
 
-var Cursor = React.createClass({
-  render: function() {
+class Cursor extends React.Component {
+  render() {
     return (
       <span className="cursor">█</span>
     );
   }
-});
+}
 
-var PromptPrefix = React.createClass({
-  render: function() {
+class PromptPrefix extends React.Component {
+  render() {
     return (
       <span className="dollar">$</span>
     );
   }
-});
+}
 
-var Prompt = React.createClass({
-  render: function() {
+class Prompt extends React.Component {
+  render() {
     return (
       <div className="prompt">
         <PromptPrefix /> <Cursor />
       </div>
     );
   }
-});
+}
 
-var Wiper = React.createClass({
-  attachAnimationListener: function(component) {
-// TODO: Do we have to clean up leaked events?
-    var callback = function(){ this.props.onWipeDone(this.props.idx); }.bind(this);
-    ["animationend", "webkitAnimationEnd", "oanimationend", "MSAnimationEnd"].forEach(function(n) {
-      React.findDOMNode(component).addEventListener(n, callback);
-    });
-  },
-  
-  render: function() {
+class Wiper extends React.Component {
+  constructor(props) {
+    super(props);
+    this.callback = () => this.props.onWipeDone(this.props.idx);
+  }
+
+  componentDidMount() {
+    var node = React.findDOMNode(this);
+    if (!node) {
+      return;
+    }
+
+    ["animationend", "webkitAnimationEnd", "oanimationend", "MSAnimationEnd"].forEach((n) =>
+      node.addEventListener(n, this.callback)
+    );
+  }
+
+  componentWillUnmount() {
+    var node = React.findDOMNode(this);
+    if (!node) {
+      return;
+    }
+
+    ["animationend", "webkitAnimationEnd", "oanimationend", "MSAnimationEnd"].forEach((n) =>
+      node.removeEventListener(n, this.callback)
+    );
+  }
+
+  render() {
     var animateClass = "ghost-type-" + this.props.speed + "-" + this.props.count;
     var renderClass = (this.props.runWipe) ? animateClass : "";
     var isWipedClass = (this.props.isWiped) ? "ghost-type-done" : "";
     return (
-      <span className={["wiper", renderClass, isWipedClass].join(" ")}
-            ref={ this.attachAnimationListener }>█</span> 
+      <span className={["wiper", renderClass, isWipedClass].join(" ")}>█</span> 
     );
   }
-});
+}
 
-var Line = React.createClass({
-  render: function() {
+class Line extends React.Component {
+  render() {
     var str = this.props.children.toString();
     return (
       <div className="line">
@@ -59,35 +77,36 @@ var Line = React.createClass({
       </div>
     );
   }
-});
+}
 
 // props: text
-var LineList = React.createClass({
-  getInitialState: function() {
-    setTimeout(function() { this.setState({ animateIdx: 0 }); }.bind(this), 500);
-    return { animateIdx: -1 };
-  },
+class LineList extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { animateIdx: -1 };
+    setTimeout(() => this.setState({ animateIdx: 0 }), 500);
+  }
 
-  handleAnimationDone: function(idx) {
+  handleAnimationDone(idx) {
     console.log("animation done: " + idx + ", " + this.props.lineData.length);
     if (idx < this.props.lineData.length) {
       this.setState({ animateIdx: idx+1 });
     }
-  },
+  }
 
-  render: function() {
-    var lines = this.props.lineData.map(function(datum, idx) {
+  render() {
+    var lines = this.props.lineData.map((datum, idx) => {
       var speed = (idx == 0) ? 1 : (idx == 1) ? 2 : 3;
       return (
         <Line idx={idx}
               speed={speed} 
               runWipe={this.state.animateIdx == idx}
               isWiped={this.state.animateIdx > idx}
-              onWipeDone={this.handleAnimationDone} >
+              onWipeDone={this.handleAnimationDone.bind(this)} >
           {datum.text}
         </Line>
       );
-    }.bind(this));
+    });
 
     return (
       <div className="lineList">
@@ -95,10 +114,10 @@ var LineList = React.createClass({
       </div>
     );
   }
-});
+}
 
-var Terminal = React.createClass({
-  render: function() {
+class Terminal extends React.Component {
+  render() {
     return (
       <div className="terminal">
         $ cat test.txt
@@ -107,7 +126,7 @@ var Terminal = React.createClass({
       </div>
     );
   }
-});
+}
 
 var lineData = [
   { text: "......Hello there" },

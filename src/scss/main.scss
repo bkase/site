@@ -109,7 +109,7 @@ html {
     .ghost-type-#{$speed}-#{$i} {
       width: 0%;
 
-      $time: ((0.05 * $i) / $speed);
+      $time: ((0.01 * $i) / $speed);
       @include animation('type #{$time}s steps(#{$i}, end)');
     }
   }
