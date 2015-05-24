@@ -68,10 +68,10 @@ $fg: $base00;
 }
 
 @include keyframes(blink) {
-  0%   { color: $fg; }
-  10%  { color: $bg; }
-  50%  { color: $fg; }
-  60%  { color: $bg; }
+  0%   { background-color: $fg; }
+  5%  { background-color: $bg; }
+  50%  { background-color: $bg; }
+  55%  { background-color: $fg; }
 }
 
 .wiper {
@@ -83,7 +83,12 @@ $fg: $base00;
 }
 
 .cursor {
-  @include animation('blink 1.1s infinite');
+  @include animation('blink 1.5s infinite');
+  width: 0.5em;
+  height: 1em;
+  vertical-align: bottom;
+  display: inline-block;
+  background-color: $fg;
 }
 
 .childWidth {
