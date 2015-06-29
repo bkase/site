@@ -3,6 +3,7 @@ import Immutable from 'immutable';
 import { Terminal } from './views.jsx';
 import { Flux } from './flux.jsx';
 import FluxComponent from 'flummox/component';
+import { connectTermToDOM } from './term.js';
 
 const flux = new Flux();
 
@@ -13,20 +14,12 @@ React.render(
   document.getElementById('page')
 );
 
-flux.getActions('terminal').newStdoutLines([
-  "......Hello there",
-  ".....................Brandon played with react today",
-  ".....................React is cool",
-  "Look at it animate..................This is all CSS",
-  "Isn't that cool",
-  "...................................................",
-  "...................................................",
-  "Yes"
-]);
+connectTermToDOM(flux);
 
-setTimeout(() => {
-  flux.getActions('terminal').newStdoutLines([
-    "................Test delay........................."
-  ]);
-}, 5000);
+const fs = flux.getStore('fs')
+const test = fs.writeFileStream(fs.pathFromString('test.txt'));
+test.write("Hello world");
+test.write("*Hello world*");
+test.write("YES Hello world");
+test.end();
 

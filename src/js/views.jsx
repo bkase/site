@@ -1,5 +1,6 @@
 import React from 'react';
 import Immutable from 'immutable';
+import FluxComponent from 'flummox/component';
 
 class Cursor extends React.Component {
   render() {
@@ -12,7 +13,15 @@ class Cursor extends React.Component {
 class PromptPrefix extends React.Component {
   render() {
     return (
-      <span className="dollar">$</span>
+      <span className="dollar">$ </span>
+    );
+  }
+}
+
+class EditablePrompt extends React.Component {
+  render() {
+    return (
+      <span className="type">{this.props.buffer}</span>
     );
   }
 }
@@ -21,7 +30,9 @@ class Prompt extends React.Component {
   render() {
     return (
       <div className="prompt">
-        <PromptPrefix /> typing<Cursor />
+        <PromptPrefix /><FluxComponent connectToStores={{
+          termbuffer: store => ({ buffer: store.getBuffer() })
+        }}><EditablePrompt /></FluxComponent><Cursor />
       </div>
     );
   }
@@ -90,7 +101,6 @@ class LineList extends React.Component {
   }
 
   handleAnimationDone(idx) {
-    console.log("animation done: " + idx + ", " + this.props.lineData.size);
     if (idx < this.props.lineData.size) {
       this.setState({ animateIdx: idx+1 });
     }
@@ -140,7 +150,6 @@ export class Terminal extends React.Component {
   render() {
     return (
       <div className="terminal">
-        $ cat test.txt
         <LineList lineData={this.state.lines} />
         <Prompt />
       </div>

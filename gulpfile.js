@@ -10,7 +10,7 @@ var babel = require('babelify');
 
 var paths = {
   scss: './src/scss/**/*.scss',
-  js: './src/js/**/*.jsx',
+  js: ['./src/js/**/*.jsx', './src/js/**/*.js'],
   mainJs: './src/js/main.jsx',
   html: './src/index.html'
 }
