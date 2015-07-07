@@ -53,6 +53,9 @@ class Wiper extends React.Component {
     ["animationend", "webkitAnimationEnd", "oanimationend", "MSAnimationEnd"].forEach((n) =>
       node.addEventListener(n, this.callback)
     );
+
+    var page = document.getElementById('page');
+    page.scrollTop = page.scrollHeight;
   }
 
   componentWillUnmount() {

@@ -10,6 +10,7 @@ function connectTermToDOM(flux) {
         keyActions.newBackspaceAction();
         break;
       case 13:
+        e.preventDefault();
         keyActions.newReturnAction();
         break;
     }
@@ -28,7 +29,8 @@ function connectTermToDOM(flux) {
     stdout: makeStdout(flux),
     stderr: makeStderr(flux),
     env: flux.getStore('env'),
-    fs: flux.getStore('fs')
+    fs: flux.getStore('fs'),
+    term: flux.getActions('terminal')
   })
 }
 

@@ -17,6 +17,11 @@ class TerminalActions extends Actions {
     console.log(`STDIN: ${line}`)
     return line;
   }
+
+  clear() {
+    console.log(`Clearing terminal`);
+    return null;
+  }
 }
 
 class KeyActions extends Actions {
@@ -40,6 +45,7 @@ class LineStore extends Store {
     const terminalActions = flux.getActions('terminal');
     this.register(terminalActions.newStdoutLines, this.handleNewStdoutLines);
     this.register(terminalActions.newStderrLines, this.handleNewStderrLines);
+    this.register(terminalActions.clear, this.handleClear);
 
     this.state = { lines: Immutable.List.of(), out: Immutable.List.of(), err: Immutable.List.of() };
   }
@@ -51,6 +57,11 @@ class LineStore extends Store {
 
   handleNewStderrLines(lines) {
     const newState = { lines: this.state.lines.concat(lines), out: this.state.lines, err: this.state.err.concat(lines) };
+    this.setState(newState);
+  }
+
+  handleClear() {
+    const newState = { lines: Immutable.List.of(), out: Immutable.List.of(), err: Immutable.List.of() };
     this.setState(newState);
   }
 
@@ -148,9 +159,38 @@ class FsStore extends Store {
     this.state = { fs: {} };
   }
 
-  pathFromString(pathstr) {
-    const res = pathstr.split("/").filter(x => x != ".");
-    return (res[0] == "") ? [] : res;
+  _dedupe(str, chr) {
+    let chrs = []
+    const orig = str.split('')
+    let last = '';
+    for (var i = 0; i < orig.length; i++) {
+      if (last == chr && last == orig[i]) {
+        continue;
+      }
+      last = orig[i];
+      chrs.push(orig[i]);
+    }
+    return chrs.join('')
+  }
+
+  _dotdotify(path) {
+    return path.reduce((b, e) => {
+      if (e == "..") {
+        if (b.length > 0) {
+          return b.slice(0, -1);
+        } else {
+          throw "IO error: path not resolvable";
+        }
+      } else {
+        return b.concat([e]);
+      }
+    }, []);
+  }
+
+  pathFromString(pwd, pathstr) {
+    const res = this._dedupe(pwd + "/" + pathstr, "/").split("/").filter(x => x != "." && x != "");
+    const res_ = this._dotdotify(res)
+    return res_
   }
 
   _last(path) {
@@ -166,7 +206,7 @@ class FsStore extends Store {
       if (x in build) {
         return build[x];
       } else {
-        throw "IO error: path to folder not found";
+        throw `IO error: path to folder ${path} not found`;
       }
     }, this.state.fs);
 
@@ -192,16 +232,28 @@ class FsStore extends Store {
     if (path.length == 0) {
       return Object.keys(this.state.fs);
     } else {
-      var deepest = this._snapshotOfDeepest(path);
-      return Object.keys(deepest)
+      if (this.isDir(path)) {
+        // ends in a dir
+        const deepest = this._snapshotOfDeepest(path);
+        return Object.keys(deepest[this._last(path)]);
+      } else {
+        // ends in a file
+        const deepest = this._snapshotOfDeepest(path);
+        if (this._last(path) in deepest) {
+          return [this._last(path)];
+        } else {
+          throw 'IO error: path does not exist'
+        }
+      }
     }
   }
 
   isDir(path) {
     var deepest = this._snapshotOfDeepest(path);
-    return !(deepest[this._last(path)] instanceof Array);
+    return !(deepest[this._last(path)] instanceof Array) && this._last(path) in deepest;
   }
 
+  // TODO: The read stream never closes!
   readFileStream(path) {
     var deepest = this._snapshotOfDeepest(path);
     var f = deepest[this._last(path)];
@@ -211,6 +263,7 @@ class FsStore extends Store {
     rs._read = () => {
       f.forEach(l => rs.push(l));
       rs.push(null);
+      rs.emit('close');
     }
     return rs;
   }
@@ -233,7 +286,7 @@ class FsStore extends Store {
 
   writeFileStream(path) {
     try {
-        rmdir(path);
+      this.rmdir(path);
     } catch (e) { }
     this.setState(this.state)
     return this.appendFileStream(path);

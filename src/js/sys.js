@@ -3,10 +3,9 @@ import { Writable, Readable } from "stream";
 function makeStderr(flux) {
   var ws = Writable();
   ws._write = (chunk, enc, next) => {
-    setTimeout(() => {
-      flux.getActions("terminal").newStderrLines([chunk]);
-      next();
-    });
+    // not using actions because we want can't wait an event tick
+    flux.getStore("lines").handleNewStderrLines([chunk]);
+    next();
   };
   return ws;
 }
@@ -14,19 +13,18 @@ function makeStderr(flux) {
 function makeStdout(flux) {
   var ws = Writable();
   ws._write = (chunk, enc, next) => {
-    setTimeout(() => {
-      flux.getActions("terminal").newStdoutLines([chunk]);
-      next();
-    });
+    // not using actions because we want can't wait an event tick
+    flux.getStore("lines").handleNewStdoutLines([chunk]);
+    next();
   };
   return ws;
 }
 
 function makeStdin(flux) {
   var inputStore = flux.getStore("input");
+  var rs = Readable();
   var onLine = (line) => { rs.push(line); };
 
-  var rs = Readable();
   rs._read = () => {
     console.log("Attempted to read");
     inputStore.attatchStdin(onLine);

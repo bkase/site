@@ -16,10 +16,23 @@ React.render(
 
 connectTermToDOM(flux);
 
+const env = flux.getStore('env')
+env.setEnv("PWD", "/");
 const fs = flux.getStore('fs')
-const test = fs.writeFileStream(fs.pathFromString('test.txt'));
+const test = fs.writeFileStream(fs.pathFromString('/', 'readme.txt'));
+test.write("Commands:");
+test.write(`const programs = {
+  'sh': sh,
+  'cat': cat,
+  'ls': ls,
+  'clear': clear,
+  'pwd': pwd,
+  'echo': echo,
+  'cd': cd,
+  'mkdir': mkdir,
+  'rm': rm,
+  'rmdir': rmdir
+};`);
 test.write("Hello world");
-test.write("*Hello world*");
-test.write("YES Hello world");
 test.end();
 
