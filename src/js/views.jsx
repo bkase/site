@@ -84,12 +84,12 @@ class Line extends React.Component {
     var str = this.props.children.toString();
     return (
       <div className="line">
-        <span className="childWidth">{str}<Wiper speed={this.props.speed}
+        <pre className="childWidth">{str}<Wiper speed={this.props.speed}
                                                   count={str.length}
                                                   idx={this.props.idx}
                                                   runWipe={this.props.runWipe}
                                                   isWiped={this.props.isWiped}
-                                                  onWipeDone={this.props.onWipeDone} /></span>
+                                                  onWipeDone={this.props.onWipeDone} /></pre>
       </div>
     );
   }

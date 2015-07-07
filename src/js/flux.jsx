@@ -260,10 +260,20 @@ class FsStore extends Store {
     console.log(`Attempting to read from ${f}`, typeof f, deepest, this._last(path), path);
 
     var rs = Readable();
+
+    const max = 5;
+    let currIdx = 0;
     rs._read = () => {
-      f.forEach(l => rs.push(l));
-      rs.push(null);
-      rs.emit('close');
+      console.log("Trying to read", currIdx, f.length, max);
+      if (currIdx >= f.length) {
+        rs.push(null);
+        rs.emit('close');
+      } else {
+        const chunk = f.slice(currIdx, Math.min(max+currIdx, f.length))
+        chunk.forEach(l => rs.push(l));
+        currIdx += max
+        rs.emit('keepgoing');
+      }
     }
     return rs;
   }

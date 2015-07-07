@@ -72,7 +72,7 @@ $fg: $base00;
   margin: 0 auto;
   width: 80em;
   overflow-y: scroll;
-  height: 25em;
+  height: 30em;
   border: 1px solid $fg;
 }
 
@@ -115,6 +115,10 @@ $fg: $base00;
 
 html {
   background-color: $bg;
+}
+
+pre {
+  margin: 0;
 }
 
 @include keyframes(type) {

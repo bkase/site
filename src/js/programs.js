@@ -1,5 +1,6 @@
 import Immutable from 'immutable';
 import { makeStdout, makeStderr, makeStdin } from './sys';
+import { Readable } from "stream";
 import maps from 'map-stream';
 
 const programs = {
@@ -12,8 +13,12 @@ const programs = {
   'cd': cd,
   'mkdir': mkdir,
   'rm': rm,
-  'rmdir': rmdir
+  'rmdir': rmdir,
+  'cp': cp,
+  'open': open
 };
+
+/* Helpers */
 
 function _safeArgSplit(str) {
   let inDQuote = false;
@@ -33,18 +38,23 @@ function _safeArgSplit(str) {
       b[b.length-1] = b[b.length-1] + e;
       return b;
     }
-  }, [""]);
+  }, [""]).filter(x => x != "");
 }
 
 function _shAdjust(innerSys, args) {
-  if (args.length >= 3) {
-    const readFilestream =
+  const outFilestream = () =>
       innerSys.fs.writeFileStream(innerSys.fs.pathFromString(innerSys.env.getEnv("PWD"), args[args.length-1]));
+  const inFilestream = () =>
+      innerSys.fs.readFileStream(innerSys.fs.pathFromString(innerSys.env.getEnv("PWD"), args[args.length-1]));
+  if (args.length >= 3) {
     if (args[args.length-2] == ">") {
-      innerSys.stdout = readFilestream;
+      innerSys.stdout = outFilestream();
       return [innerSys, args.slice(0, -2)];
     } else if (args[args.length-2] == "2>") {
-      innerSys.stderr = readFilestream;
+      innerSys.stderr = outFilestream();
+      return [innerSys, args.slice(0, -2)];
+    } else if (args[args.length-2] == "<") {
+      innerSys.stdin = inFilestream();
       return [innerSys, args.slice(0, -2)];
     } else {
       return [innerSys, args];
@@ -54,20 +64,40 @@ function _shAdjust(innerSys, args) {
   }
 }
 
-function sh(argv, sys) {
-  var newSys = () => { return {
-      flux: sys.flux, /* you need flux to fork */
-      stdout: makeStdout(sys.flux),
-      stderr: makeStderr(sys.flux),
-      stdin: makeStdin(sys.flux),
-      env: sys.env,
-      fs: sys.fs,
-      term: sys.term
-  } };
+function _newSys(sys) {
+  return {
+    flux: sys.flux, /* you need flux to fork */
+    stdout: makeStdout(sys.flux),
+    stderr: makeStderr(sys.flux),
+    stdin: makeStdin(sys.flux),
+    env: sys.env,
+    fs: sys.fs,
+    term: sys.term
+  };
+}
 
+// returns a promise of the return code of the script
+function _script(strs, sys) {
+  const innerSys = _newSys(sys);
+  const rs = Readable();
+  rs._read = () => {
+    console.log("Attempted to read SCRIPT stdin");
+    strs.forEach(str => rs.push(str));
+    rs.push(null);
+  }
+  rs.on('close', () => {
+    console.log("SCRIPT read closed");
+  });
+  innerSys.stdin = rs;
+  return sh(["sh", "--quiet"], innerSys)
+}
+
+/* Programs */
+
+function sh(argv, sys) {
   const handleFail = (code) => sys.stdout.write(`Exited with code ${code}`);
   const exec = (prog, args) => {
-    const innerSys = newSys();
+    const innerSys = _newSys(sys);
     const [modSys, modArgs] = _shAdjust(innerSys, args)
     prog(modArgs, modSys)
       .then(handleFail)
@@ -76,9 +106,22 @@ function sh(argv, sys) {
       .then(() => console.log("PROG ENDED"));
   };
 
+  let isQuiet = false;
+
+  argv.slice(1).forEach(flag => {
+    switch (flag) {
+      case "--quiet":
+        isQuiet = true;
+      default:
+        break;
+    }
+  })
+
   return new Promise((r) => {
     console.log("Initing shell");
-    sys.stdin.pipe(maps((data, cb) => cb(null, "$ " + data))).pipe(sys.stdout);
+    if (!isQuiet) {
+      sys.stdin.pipe(maps((data, cb) => cb(null, "$ " + data))).pipe(sys.stdout);
+    }
     sys.stdin.on("data", (buf) => {
       const asStr = buf.toString();
       const args = _safeArgSplit(asStr);
@@ -123,9 +166,13 @@ function cat(argv, sys) {
 function ls(argv, sys) {
     try {
       const dirs = sys.fs.lsdir(sys.fs.pathFromString(sys.env.getEnv("PWD"), argv[1] || ""))
-        console.log("Got dirs", dirs);
-      dirs.forEach(l => sys.stdout.write(l));
-      return Promise.resolve(0);
+      if (dirs) {
+        dirs.forEach(l => sys.stdout.write(l));
+        return Promise.resolve(0);
+      } else {
+        sys.stderr.write("IO error: cannot find file or directory");
+        return Promise.resolve(2);
+      }
     } catch (e) {
       sys.stderr.write(e.message);
       return Promise.resolve(2);
@@ -151,7 +198,7 @@ function echo(argv, sys) {
     sys.stderr.write(`Usage: ${argv[0]} string-to-echo`);
     return Promise.resolve(1);
   }
-  sys.stdout.write(argv[1]);
+  sys.stdout.write(argv.slice(1).join(''));
   return Promise.resolve(0);
 }
 
@@ -226,6 +273,31 @@ function rmdir(argv, sys) {
     sys.stderr.write("Cannot find dir to delete");
     return Promise.resolve(2);
   }
+}
+
+function cp(argv, sys) {
+  if (argv.length < 3) {
+    sys.stderr.write(`Usage: ${argv[0]} /path/to/orig /path/to/new`);
+    return Promise.resolve(1);
+  }
+  return _script([`cat ${argv[1]} > ${argv[2]}`], sys)
+}
+
+function mv(argv, sys) {
+  if (argv.length < 3) {
+    sys.stderr.write(`Usage: ${argv[0]} /path/to/orig /path/to/new`);
+    return Promise.resolve(1);
+  }
+  return _script([`cp ${argv[1]} ${argv[2]} && rm ${argv[1]}`], sys)
+}
+
+function open(argv, sys) {
+  if (argv.length < 2) {
+    sys.stderr.write(`Usage: ${argv[0]} http://www.url.to.open`);
+  }
+  const win = window.open(argv[1], '_blank');
+  win.focus();
+  return Promise.resolve(0);
 }
 
 export { sh }
