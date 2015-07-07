@@ -67,6 +67,23 @@ $fg: $base00;
   color: $fg;
 }
 
+#page {
+  padding: 0.5em;
+  margin: 0 auto;
+  width: 80em;
+  overflow-y: scroll;
+  height: 25em;
+  border: 1px solid $fg;
+}
+
+#page::-webkit-scrollbar {
+  width: 0.5em;
+}
+
+#page::-webkit-scrollbar-thumb {
+  background: $fg;
+}
+
 @include keyframes(blink) {
   0%   { background-color: $fg; }
   5%  { background-color: $bg; }
