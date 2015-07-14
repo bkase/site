@@ -20,6 +20,27 @@ const env = flux.getStore('env')
 env.setEnv("PWD", "/");
 const fs = flux.getStore('fs')
 const about = fs.writeFileStream(fs.pathFromString('/', 'about.txt'));
+const mql = window.matchMedia("screen and (max-width: 1200px)")
+if (mql.matches) { // if media query matches
+about.write(`
+-==~ Brandon Kase ~==-
+
+I like types and making things.
+
+Working on Roll @ Highlight: tryroll.com
+Studied @ Carnegie Mellon, SCS 2014
+Interned @ Qualcomm, Facebook, Mozilla
+
+This is a unix-like shell on an
+in-memory filesystem.
+Try cat,ls,cp,rm,mkdir,cd,echo,sh.
+I/O redirection works.
+You can even run sh inside this sh!
+
+"sh < /bin/contactme.sh" to contact me.
+"sh < /bin/blog.sh" to go to blog.
+"sh < /bin/resume.sh" to get resume.`);
+} else {
 about.write(`
    --------------------------------------------------------------
    |                                                            |
@@ -41,6 +62,7 @@ about.write(`
    |                                                            |
    --------------------------------------------------------------
 `);
+}
 about.end();
 
 fs.mkdir(fs.pathFromString('/', 'bin'));
