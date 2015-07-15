@@ -4,22 +4,22 @@ import { Writable, Readable } from 'stream';
 
 class TerminalActions extends Actions {
   newStdoutLines(strs) {
-    console.log(`STDOUT: ${strs}`)
+    //console.log(`STDOUT: ${strs}`)
     return strs;
   }
 
   newStderrLines(strs) {
-    console.log(`STDERR: ${strs}`)
+    //console.log(`STDERR: ${strs}`)
     return strs;
   }
 
   newStdinLine(line) {
-    console.log(`STDIN: ${line}`)
+    //console.log(`STDIN: ${line}`)
     return line;
   }
 
   clear() {
-    console.log(`Clearing terminal`);
+    //console.log(`Clearing terminal`);
     return null;
   }
 }
@@ -112,7 +112,7 @@ class InputStore extends Store {
   }
 
   handleNewStdinLine(line) {
-    console.log("Attempted to handle new stdin", this.state);
+    //console.log("Attempted to handle new stdin", this.state);
     if (this.state.onLineStack.peek()) {
       this.state.onLineStack.peek()(line)
     }
@@ -257,14 +257,14 @@ class FsStore extends Store {
   readFileStream(path) {
     var deepest = this._snapshotOfDeepest(path);
     var f = deepest[this._last(path)];
-    console.log(`Attempting to read from ${f}`, typeof f, deepest, this._last(path), path);
+    //console.log(`Attempting to read from ${f}`, typeof f, deepest, this._last(path), path);
 
     var rs = Readable();
 
     const max = 5;
     let currIdx = 0;
     rs._read = () => {
-      console.log("Trying to read", currIdx, f.length, max);
+      //console.log("Trying to read", currIdx, f.length, max);
       if (currIdx >= f.length) {
         rs.push(null);
         rs.emit('close');

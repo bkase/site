@@ -26,11 +26,11 @@ function makeStdin(flux) {
   var onLine = (line) => { rs.push(line); };
 
   rs._read = () => {
-    console.log("Attempted to read");
+    //console.log("Attempted to read");
     inputStore.attatchStdin(onLine);
   }
   rs.on('close', () => {
-    console.log("Read closed");
+    //console.log("Read closed");
     inputStore.detatchStdin(onLine);
   });
   return rs;

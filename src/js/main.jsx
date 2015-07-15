@@ -76,3 +76,8 @@ const resumesh = fs.writeFileStream(fs.pathFromString('/bin', 'resume.sh'));
 resumesh.write("open todo");
 resumesh.end();
 
+console.log("-----------------------------------");
+console.log("-- If you want the source go to: --");
+console.log("-- https://github.com/bkase/site --");
+console.log("-----------------------------------");
+

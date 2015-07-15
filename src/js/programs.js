@@ -81,12 +81,12 @@ function _script(strs, sys) {
   const innerSys = _newSys(sys);
   const rs = Readable();
   rs._read = () => {
-    console.log("Attempted to read SCRIPT stdin");
+    //console.log("Attempted to read SCRIPT stdin");
     strs.forEach(str => rs.push(str));
     rs.push(null);
   }
   rs.on('close', () => {
-    console.log("SCRIPT read closed");
+    //console.log("SCRIPT read closed");
   });
   innerSys.stdin = rs;
   return sh(["sh", "--quiet"], innerSys)
@@ -102,8 +102,7 @@ function sh(argv, sys) {
     prog(modArgs, modSys)
       .then(handleFail)
       .then(() => modSys.stdin.emit('close'))
-      .then(() => modSys.stdout.end())
-      .then(() => console.log("PROG ENDED"));
+      .then(() => modSys.stdout.end());
   };
 
   let isQuiet = false;
@@ -118,14 +117,14 @@ function sh(argv, sys) {
   })
 
   return new Promise((r) => {
-    console.log("Initing shell");
+    //console.log("Initing shell");
     if (!isQuiet) {
       sys.stdin.pipe(maps((data, cb) => cb(null, "$ " + data))).pipe(sys.stdout);
     }
     sys.stdin.on("data", (buf) => {
       const asStr = buf.toString();
       const args = _safeArgSplit(asStr);
-      console.log("sh is shelling ", args);
+      //console.log("sh is shelling ", args);
       if (args[0] in programs) {
         exec(programs[args[0]], args);
       } else {
@@ -149,11 +148,11 @@ function cat(argv, sys) {
     return Promise.resolve(1);
   }
   return new Promise((r) => {
-    console.log("observe ", sys.stdin);
+    //console.log("observe ", sys.stdin);
     try {
       sys.fs.readFileStream(sys.fs.pathFromString(sys.env.getEnv("PWD"), argv[1]))
         .pipe(sys.stdout)
-        .on('error', (e) => { console.log(e); return r(2) })
+        .on('error', (e) => { /*(console.log(e);*/ return r(2) })
         .on('end', () => r(0))
         .on('close', () => r(0));
     } catch (e) {
