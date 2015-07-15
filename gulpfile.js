@@ -6,7 +6,11 @@ var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var browserify = require('browserify');
 var watchify = require('watchify');
-var babel = require('babelify');
+var babelify = require('babelify');
+var uglifyify = require('uglifyify');
+var envify = require('envify/custom');
+var execSync = require('exec-sync');
+var clean = require('gulp-clean');
 
 var paths = {
   scss: './src/scss/**/*.scss',
@@ -23,15 +27,28 @@ gulp.task('sass', function() {
       .pipe(gulp.dest('./dist/css'));
 });
 
-function compile(watch) {
-  var bundler = watchify(browserify(paths.mainJs, { debug: true }).transform(babel));
+function compile(watch, isDebug) {
+  if (!isDebug) {
+    // for some reason chaining transforms on browserify doesn't work
+    // but the from the shell it does, oh well
+    console.log('-> prod making...');
+    execSync("NODE_ENV=production browserify -t babelify -t envify -g uglifyify src/js/main.jsx -o dist/js/build.js");
+    return;
+  }
+
+  var bundler = watchify(
+      browserify(paths.mainJs, { debug: isDebug })
+        .transform(babelify)
+        .transform(envify({ NODE_ENV: isDebug ? "development" : "production" }))
+        .transform(uglifyify)
+  );
 
   function rebundle() {
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(source('build.js'))
       .pipe(buffer())
-      .pipe(sourcemaps.init({ loadMaps: true }))
+      .pipe(sourcemaps.init({ loadMaps: isDebug }))
       .pipe(sourcemaps.write('./'))
       .pipe(gulp.dest('./dist/js'));
   }
@@ -43,13 +60,14 @@ function compile(watch) {
     });
   }
 
+  console.log('-> bundling...');
   rebundle();
 }
 
 gulp.task('babel', function() {
   gulp.src(paths.js)
       .pipe(sourcemaps.init())
-        .pipe(babel())
+        .pipe(babelify())
         .on('error', dumpBabelErr)
         .pipe(concat('all.js'))
       .pipe(sourcemaps.write())
@@ -64,8 +82,18 @@ gulp.task('html', function() {
 gulp.task('watch', function() {
   gulp.watch(paths.scss, ["sass"]);
   gulp.watch(paths.html, ["html"]);
-  compile(true);
+  compile(true, true);
+});
+
+gulp.task('build', function() {
+  compile(false, false);
+});
+
+gulp.task('clean-js', function() {
+  gulp.src('dist/js/*')
+      .pipe(clean());
 });
 
 gulp.task('default', ['sass', 'html', 'watch']);
+gulp.task('prod', ['sass', 'html', 'clean-js', 'build']);
 
