@@ -70,7 +70,7 @@ const contactmesh = fs.writeFileStream(fs.pathFromString('/bin', 'contactme.sh')
 contactmesh.write("echo brandon        .       kase    @  gmail                 . com");
 contactmesh.end();
 const blogsh = fs.writeFileStream(fs.pathFromString('/bin', 'blog.sh'));
-blogsh.write("open todo");
+blogsh.write("open http://hkr.me");
 blogsh.end();
 const resumesh = fs.writeFileStream(fs.pathFromString('/bin', 'resume.sh'));
 resumesh.write("open todo");
