@@ -48,7 +48,7 @@ about.write(`
    |                                                            |
    |  I like types and making things.                           |
    |                                                            |
-   |  Currently working on Roll @ Highlight: tryroll.com        |
+   |  Currently working on Shorts @ Highlight: tryonshorts.com  |
    |  Studied @ Carnegie Mellon, SCS 2014                       |
    |  Interned @ Qualcomm, Facebook, Mozilla                    |
    |                                                            |
