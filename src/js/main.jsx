@@ -25,10 +25,10 @@ if (mql.matches) { // if media query matches
 about.write(`
 -==~ Brandon Kase ~==-
 
-I like types and making things.
+Bringing typed FP to weird places.
 
-Working on the world's catalog of ideas @ Pinterest
-Previously @ Highlight, Facebook, Mozilla
+Now @ Pinterest (iOS & Web)
+Before @ Highlight, Facebook, Mozilla
 Studied @ Carnegie Mellon, SCS 2014
 
 This is a unix-like shell on an
@@ -46,9 +46,9 @@ about.write(`
    |                                                            |
    |                   -==~ Brandon Kase ~==-                   |
    |                                                            |
-   |  I like types and making things.                           |
+   |  Bringing typed functional programming to weird places.    |
    |                                                            |
-   |  Working on the world's catalog of ideas @ Pinterest       |
+   |  Now @ Pinterest (iOS & Web)                               |
    |  Previously @ Highlight, Facebook, Mozilla                 |
    |  Studied @ Carnegie Mellon, SCS 2014                       |
    |                                                            |
