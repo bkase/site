@@ -27,9 +27,9 @@ about.write(`
 
 I like types and making things.
 
-Working on Roll @ Highlight: tryroll.com
+Working on the world's catalog of ideas @ Pinterest
+Previously @ Highlight, Facebook, Mozilla
 Studied @ Carnegie Mellon, SCS 2014
-Interned @ Qualcomm, Facebook, Mozilla
 
 This is a unix-like shell on an
 in-memory filesystem.
@@ -48,9 +48,9 @@ about.write(`
    |                                                            |
    |  I like types and making things.                           |
    |                                                            |
-   |  Currently working on Shorts @ Highlight: tryonshorts.com  |
+   |  Working on the world's catalog of ideas @ Pinterest       |
+   |  Previously @ Highlight, Facebook, Mozilla                 |
    |  Studied @ Carnegie Mellon, SCS 2014                       |
-   |  Interned @ Qualcomm, Facebook, Mozilla                    |
    |                                                            |
    |  This is a unix-like shell on an in-memory filesystem.     |
    |  Try cat,ls,cp,rm,mkdir,cd,echo,sh. I/O redirection works. |
