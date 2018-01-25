@@ -27,8 +27,8 @@ about.write(`
 
 Bringing typed FP to weird places.
 
-Now @ Pinterest (iOS & Web)
-Before @ Highlight, Facebook, Mozilla
+Now @ O(1) Labs (Cryptocurrency/OCaml)
+Before @ Pinterest, Highlight, Facebook
 Studied @ Carnegie Mellon, SCS 2014
 
 This is a unix-like shell on an
@@ -48,8 +48,8 @@ about.write(`
    |                                                            |
    |  Bringing typed functional programming to weird places.    |
    |                                                            |
-   |  Now @ Pinterest (iOS & Web)                               |
-   |  Previously @ Highlight, Facebook, Mozilla                 |
+   |  Now @ O(1) Labs (Cryptocurrency hacking in Ocaml)         |
+   |  Previously @ Pinterest, Highlight, Facebook, Mozilla      |
    |  Studied @ Carnegie Mellon, SCS 2014                       |
    |                                                            |
    |  This is a unix-like shell on an in-memory filesystem.     |
